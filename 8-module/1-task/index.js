@@ -1,14 +1,12 @@
 class ProductList {
-  productsUrl = '/assets/data/products.json';
-  productsStoreKey = 'cart-products';
-  templateMain =
-      `<div class="row justify-content-end">`
-    +   `<div class="col-lg-9">`
-    +     `<h3 class="section-title">Top Recommendations for You</h3>`
-    +     `<div class="row homepage-cards">`
-    +     `</div>`
-    +   `</div>`
-    + `</div>`;
+  products = [];
+  cartProducts = [];
+
+  options = {
+    productsUrl: '/assets/data/products.json',
+    productsStoreKey: 'cart-products',
+  };
+
 
   
     
@@ -17,11 +15,27 @@ class ProductList {
   }
 
   show() {
-    return fetch(this.productsUrl)
+    return fetch(this.options.productsUrl)
       .then(response => response.json())
-      .then(json => {
-        this.products = json;
+      .then(products => {
+        this.products = products;
         this.el.innerHTML = this.getProductListHTML(this.products);
+        
+        // Обработчик добавления товара в корзину
+        this.el.addEventListener('click', event => {
+          if (event.target.dataset.buttonRole === 'add-to-cart'
+              && confirm('Вы уверенны, что хотите добавить этот товар в корзину?'))
+          {
+            let productId = +event.target.closest('[data-product-id]').dataset.productId;
+            
+            // Если товара еще нет в корзине
+            if ( !this.cartProducts.find(product => product.id === productId) ) {
+              this.cartProducts.push(this.products.find(product => product.id === productId));
+            }
+            
+            localStorage.setItem(this.options.productsStoreKey, JSON.stringify(this.cartProducts));
+          }
+        });
       });
   }
 
@@ -29,7 +43,7 @@ class ProductList {
     let html = 
         `<div class="row justify-content-end">`
       +   `<div class="col-lg-9">`
-      +     `<h3 class="section-title">Top Recommendations for You</h3>`
+      +     `<h3 class="section-title">Top Recommendations for You | <a href="/checkout.html">Your Cart</a></h3>`
       +     `<div class="row homepage-cards">`;
 
     for (let product of products) {
