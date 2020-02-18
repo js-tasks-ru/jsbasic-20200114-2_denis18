@@ -1,17 +1,20 @@
 class ProductList {
   products = [];
-  cartProducts = [];
 
   options = {
     productsUrl: '/assets/data/products.json',
     productsStoreKey: 'cart-products',
   };
-
-
-  
     
   constructor(element) {
     this.el = element;
+    
+    const productJSON = localStorage.getItem(this.options.productsStoreKey);
+    if (productJSON) {
+      this.cartProducts = JSON.parse(productJSON);
+    } else {
+      this.cartProducts = [];
+    }
   }
 
   show() {
